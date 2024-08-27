@@ -37,8 +37,10 @@ using hobot::dnn_node::output_parser::DnnParserResult;
 using hobot::dnn_node::output_parser::OpticalFlow;
 using hobot::dnn_node::output_parser::Perception;
 
-// int RenderSeg(cv::Mat &mat, OpticalFlow &flow, std::string& saving_path);
-int GetCombine(cv::Mat &mat, OpticalFlow &flow, cv::Mat &output);
+struct PwcNetOutput;
+enum class ImgType;
+
+int GetCombine(std::shared_ptr<PwcNetOutput>, OpticalFlow &flow, cv::Mat &output);
 class PwcNetOutputParser {
  public:
   PwcNetOutputParser(int output_height, int output_width, int num_classes, float mask_threshold) {
