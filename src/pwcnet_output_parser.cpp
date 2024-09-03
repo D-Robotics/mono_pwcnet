@@ -184,9 +184,5 @@ int GetCombine(std::shared_ptr<PwcNetOutput> out, OpticalFlow &flow, cv::Mat &ou
   mat.copyTo(output(cv::Rect(0, 0, mat.cols, mat.rows)));
   flow_img.copyTo(output(cv::Rect(0, mat.rows, flow_img.cols, flow_img.rows)));
 
-  // RCLCPP_INFO(rclcpp::get_logger("MobileSam"),
-  //             "Draw result to file: %s",
-  //             saving_path.c_str());
-  // cv::imwrite("flow.jpeg", flow_img);
   return 0;
 }

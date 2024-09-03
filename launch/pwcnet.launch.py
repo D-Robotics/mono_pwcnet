@@ -27,11 +27,11 @@ from ament_index_python.packages import get_package_prefix
 
 def generate_launch_description():
     # 拷贝config中文件
-    dnn_node_example_path = os.path.join(
-        get_package_prefix('dnn_node_example'),
-        "lib/dnn_node_example")
-    print("dnn_node_example_path is ", dnn_node_example_path)
-    cp_cmd = "cp -r " + dnn_node_example_path + "/config ."
+    mono_pwcnet_path = os.path.join(
+        get_package_prefix('mono_pwcnet'),
+        "lib/mono_pwcnet")
+    print("mono_pwcnet_path is ", mono_pwcnet_path)
+    cp_cmd = "cp -r " + mono_pwcnet_path + "/config ."
     print("cp_cmd is ", cp_cmd)
     os.system(cp_cmd)
 
@@ -43,10 +43,10 @@ def generate_launch_description():
         "pwcnet_dump_render_img", default_value=TextSubstitution(text="0")
     )
     image_width_launch_arg = DeclareLaunchArgument(
-        "dnn_example_image_width", default_value=TextSubstitution(text="640")
+        "dnn_example_image_width", default_value=TextSubstitution(text="512")
     )
     image_height_launch_arg = DeclareLaunchArgument(
-        "dnn_example_image_height", default_value=TextSubstitution(text="480")
+        "dnn_example_image_height", default_value=TextSubstitution(text="384")
     )
     msg_pub_topic_name_launch_arg = DeclareLaunchArgument(
         "pwcnet_msg_pub_topic_name", default_value=TextSubstitution(text="/pwcnet_msg")
@@ -89,7 +89,7 @@ def generate_launch_description():
         # 本地图片发布
         feedback_picture_arg = DeclareLaunchArgument(
             'publish_image_source',
-            default_value='/userdata/pwcnet/config/',
+            default_value='config/',
             description='feedback picture')
 
         fb_node = IncludeLaunchDescription(

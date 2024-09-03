@@ -113,17 +113,17 @@ PwcNetNode::PwcNetNode(const std::string& node_name,
   }
   // 使用基类接口初始化，加载模型
   if (Init() != 0) {
-    RCLCPP_ERROR(rclcpp::get_logger("hobot_yolo_world"), "Init failed!");
+    RCLCPP_ERROR(rclcpp::get_logger("mono_pwcnet"), "Init failed!");
     rclcpp::shutdown();
     return;
   }
   // 未指定模型名，从加载的模型中查询出模型名
   if (model_name_.empty()) {
     if (!GetModel()) {
-      RCLCPP_ERROR(rclcpp::get_logger("hobot_yolo_world"), "Get model fail.");
+      RCLCPP_ERROR(rclcpp::get_logger("mono_pwcnet"), "Get model fail.");
     } else {
       model_name_ = GetModel()->GetName();
-      RCLCPP_WARN(rclcpp::get_logger("hobot_yolo_world"), "Get model name: %s from load model.", model_name_.c_str());
+      RCLCPP_WARN(rclcpp::get_logger("mono_pwcnet"), "Get model name: %s from load model.", model_name_.c_str());
     }
   }
   // 加载模型后查询模型输入分辨率
@@ -180,7 +180,7 @@ PwcNetNode::~PwcNetNode() {}
 
 
 int PwcNetNode::SetNodePara() {
-  RCLCPP_INFO(rclcpp::get_logger("hobot_yolo_world"), "Set node para.");
+  RCLCPP_INFO(rclcpp::get_logger("mono_pwcnet"), "Set node para.");
   if (!dnn_node_para_ptr_) {
     return -1;
   }
@@ -411,8 +411,6 @@ void PwcNetNode::RosImgProcess(
         model_input_height_,
         model_input_width_,
         tensor_properties);
-  } else {
-    return;
   }
   img_l.unlock();
 
