@@ -21,7 +21,6 @@
 #include "cv_bridge/cv_bridge.h"
 #include "dnn_node/dnn_node.h"
 #include "dnn_node/util/image_proc.h"
-#include "dnn_node/util/output_parser/perception_common.h"
 
 #ifdef SHARED_MEM_ENABLED
 #include "hbm_img_msgs/msg/hbm_msg1080_p.hpp"
@@ -99,6 +98,14 @@ private:
     std::mutex queue_mutex;
     std::condition_variable condition;
     bool stop;
+};
+
+struct OpticalFlow {
+  std::vector<float> data;
+  int32_t width = 0; // 图像送入模型前经过resize的w
+  int32_t height = 0; // 图像送入模型前经过resize的h
+  int32_t valid_h = 0; // 最终输出的光流图的有效h
+  int32_t valid_w = 0; // 最终输出的光流图的有效w
 };
 
 enum class ImgType {

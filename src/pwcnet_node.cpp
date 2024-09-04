@@ -18,12 +18,11 @@
 #include <unistd.h>
 #include <utility>
 
-#include "hobot_cv/hobotcv_imgproc.h"
-#include "opencv2/core/mat.hpp"
-#include "opencv2/imgcodecs.hpp"
-#include "opencv2/imgproc.hpp"
-
 #include "dnn/hb_sys.h"
+#include "include/image_proc.h"
+#include "include/image_utils.h"
+#include "include/pwcnet_output_parser.h"
+
 #include "include/pwcnet_node.h"
 
 builtin_interfaces::msg::Time ConvertToRosTime(
@@ -57,15 +56,7 @@ int readbinary(const std::string &filename, const T* &dataOut) {
   return len / sizeof(T);
 }
 
-int ResizeNV12Img(const char *in_img_data,
-                  const int &in_img_height,
-                  const int &in_img_width,
-                  int &resized_img_height,
-                  int &resized_img_width,
-                  const int &scaled_img_height,
-                  const int &scaled_img_width,
-                  cv::Mat &out_img,
-                  float &ratio);
+
 
 PwcNetNode::PwcNetNode(const std::string& node_name,
                                const NodeOptions& options)
@@ -216,8 +207,8 @@ int PwcNetNode::PostProcess(
   clock_gettime(CLOCK_REALTIME, &time_now);
 
   // 2. 模型后处理解析
-  auto det_result = std::make_shared<DnnParserResult>();
-  output_parser_->Parse(det_result,
+  auto flow_data = std::make_shared<OpticalFlow>();
+  output_parser_->Parse(flow_data,
                 parser_output->resized_h,
                 parser_output->resized_w,
                 model_input_height_,
@@ -230,7 +221,7 @@ int PwcNetNode::PostProcess(
   // 如果开启了渲染，本地渲染并存储图片
   if (!parser_output->img_mat.empty() && dump_render_img_ == 1) {
     cv::Mat combined_img;
-    GetCombine(parser_output, det_result->perception.flow, combined_img);
+    ImageUtils::Render(parser_output, *flow_data, combined_img);
     std::string saving_path = "render_pwcnet_" + pub_data->header.frame_id + "_" +
                             std::to_string(pub_data->header.stamp.sec) + "_" +
                             std::to_string(pub_data->header.stamp.nanosec) +
@@ -251,15 +242,14 @@ int PwcNetNode::PostProcess(
   }
   
   // 3.1 发布光流AI消息
-  auto &flow = det_result->perception.flow;
-  if (flow.height != 0 && flow.width != 0) {
+  if (flow_data->height != 0 && flow_data->width != 0) {
     ai_msgs::msg::Capture capture;
-    capture.features.swap(flow.data);
-    capture.img.height = flow.valid_h;
-    capture.img.width = flow.valid_w;
+    capture.features.swap(flow_data->data);
+    capture.img.height = flow_data->valid_h;
+    capture.img.width = flow_data->valid_w;
 
-    capture.img.step = static_cast<int>(std::round(static_cast<float>(flow.height) / 
-                                        static_cast<float>(flow.valid_h)));
+    capture.img.step = static_cast<int>(std::round(static_cast<float>(flow_data->height) / 
+                                        static_cast<float>(flow_data->valid_h)));
 
     RCLCPP_INFO(rclcpp::get_logger("mono_pwcnet"),
                 "features size: %d, width: %d, height: %d, step: %d",
@@ -366,7 +356,7 @@ void PwcNetNode::RosImgProcess(
   if ("nv12" ==
       std::string(reinterpret_cast<const char *>(img_msg->encoding.data()))) {
     cv::Mat cur_img, yuv444_img;
-    if (ResizeNV12Img(reinterpret_cast<const char *>(img_msg->data.data()),
+    if (ImageProc::ResizeNV12Img(reinterpret_cast<const char *>(img_msg->data.data()),
                       img_msg->height,
                       img_msg->width,
                       dnn_output->resized_h,
@@ -379,11 +369,11 @@ void PwcNetNode::RosImgProcess(
                     "Resize nv12 img fail!");
       return;
     }
-    hobot::dnn_node::ImageProc::Nv12ToYUV444(cur_img, 
-                                             dnn_output->resized_h, 
-                                             dnn_output->resized_w, 
-                                             yuv444_img,
-                                             -128);
+    ImageProc::Nv12ToYUV444(cur_img, 
+                            dnn_output->resized_h, 
+                            dnn_output->resized_w, 
+                            yuv444_img,
+                            -128);
     std::unique_lock<std::mutex> img_l(mtx_img_);
     if (cache_img_.size() > cache_img_limit_) {
       cache_img_.pop();
@@ -488,7 +478,7 @@ void PwcNetNode::SharedMemImgProcess(
   if ("nv12" ==
       std::string(reinterpret_cast<const char *>(img_msg->encoding.data()))) {
     cv::Mat cur_img, yuv444_img;
-    if (ResizeNV12Img(reinterpret_cast<const char *>(img_msg->data.data()),
+    if (ImageProc::ResizeNV12Img(reinterpret_cast<const char *>(img_msg->data.data()),
                         img_msg->height,
                         img_msg->width,
                         dnn_output->resized_h,
@@ -501,11 +491,11 @@ void PwcNetNode::SharedMemImgProcess(
                      "Resize nv12 img fail!");
         return;
     }
-    hobot::dnn_node::ImageProc::Nv12ToYUV444(cur_img, 
-                                             dnn_output->resized_h, 
-                                             dnn_output->resized_w, 
-                                             yuv444_img,
-                                             -128);
+    ImageProc::Nv12ToYUV444(cur_img, 
+                            dnn_output->resized_h, 
+                            dnn_output->resized_w, 
+                            yuv444_img,
+                            -128);
     std::unique_lock<std::mutex> img_l(mtx_img_);
     if (cache_img_.size() > cache_img_limit_) {
       cache_img_.pop();
@@ -740,8 +730,8 @@ std::shared_ptr<DNNTensor> PwcNetNode::LocalImagePreprocesss(
 
   cv::Mat mat1_yuv444, mat2_yuv444;
 
-  auto ret1 = hobot::dnn_node::ImageProc::BGRToYUV444(pad_frame1, mat1_yuv444, -128);
-  auto ret2 = hobot::dnn_node::ImageProc::BGRToYUV444(pad_frame2, mat2_yuv444, -128);
+  auto ret1 = ImageProc::BGRToYUV444(pad_frame1, mat1_yuv444, -128);
+  auto ret2 = ImageProc::BGRToYUV444(pad_frame2, mat2_yuv444, -128);
   if (ret1 || ret2) {
     RCLCPP_ERROR(rclcpp::get_logger("pwcnet"), 
                  "get yuv444 image failed");
@@ -794,50 +784,7 @@ std::shared_ptr<DNNTensor> PwcNetNode::LocalImagePreprocesss(
 }
 
 
-// 使用hobotcv resize nv12格式图片，固定图片宽高比
-int ResizeNV12Img(const char *in_img_data,
-                  const int &in_img_height,
-                  const int &in_img_width,
-                  int &resized_img_height,
-                  int &resized_img_width,
-                  const int &scaled_img_height,
-                  const int &scaled_img_width,
-                  cv::Mat &out_img,
-                  float &ratio) {
-  cv::Mat src(
-      in_img_height * 3 / 2, in_img_width, CV_8UC1, (void *)(in_img_data));
-  float ratio_w =
-      static_cast<float>(in_img_width) / static_cast<float>(scaled_img_width);
-  float ratio_h =
-      static_cast<float>(in_img_height) / static_cast<float>(scaled_img_height);
-  float dst_ratio = std::max(ratio_w, ratio_h);
-  int resized_width, resized_height;
-  if (dst_ratio == ratio_w) {
-    resized_width = scaled_img_width;
-    resized_height = static_cast<float>(in_img_height) / dst_ratio;
-  } else if (dst_ratio == ratio_h) {
-    resized_width = static_cast<float>(in_img_width) / dst_ratio;
-    resized_height = scaled_img_height;
-  }
-  // hobot_cv要求输出宽度为16的倍数
-  int remain = resized_width % 16;
-  if (remain != 0) {
-    //向下取16倍数，重新计算缩放系数
-    resized_width -= remain;
-    dst_ratio = static_cast<float>(in_img_width) / resized_width;
-    resized_height = static_cast<float>(in_img_height) / dst_ratio;
-  }
-  //高度向下取偶数
-  resized_height =
-      resized_height % 2 == 0 ? resized_height : resized_height - 1;
-  ratio = dst_ratio;
 
-  resized_img_height = resized_height;
-  resized_img_width = resized_width;
-
-  return hobot_cv::hobotcv_resize(
-      src, in_img_height, in_img_width, out_img, resized_height, resized_width);
-}
 
 
 std::shared_ptr<DNNTensor> PwcNetNode::SharedImagePreprocesss(

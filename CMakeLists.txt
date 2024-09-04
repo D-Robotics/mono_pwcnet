@@ -37,6 +37,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(ai_msgs REQUIRED)
 find_package(cv_bridge REQUIRED)
+find_package(hobot_cv REQUIRED)
 find_package(dnn_node REQUIRED)
 find_package(hbm_img_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
@@ -75,6 +76,8 @@ add_executable(${PROJECT_NAME}
   src/main.cpp
   src/pwcnet_node.cpp
   src/pwcnet_output_parser.cpp
+  src/image_proc.cpp
+  src/image_utils.cpp
 )
 
 ament_target_dependencies(
@@ -83,6 +86,7 @@ ament_target_dependencies(
   ai_msgs
   cv_bridge
   dnn_node
+  hobot_cv
   hbm_img_msgs
   sensor_msgs
 )
@@ -103,8 +107,8 @@ install(DIRECTORY
 )
 
 install(FILES
-  ${PROJECT_SOURCE_DIR}/config/img1.jpg
-  ${PROJECT_SOURCE_DIR}/config/img2.jpg
+  ${PROJECT_SOURCE_DIR}/config/img001.jpg
+  ${PROJECT_SOURCE_DIR}/config/img002.jpg
   DESTINATION lib/${PROJECT_NAME}/config/
 )
 
