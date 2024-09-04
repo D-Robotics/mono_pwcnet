@@ -27,17 +27,17 @@ from ament_index_python.packages import get_package_prefix
 
 def generate_launch_description():
     # 拷贝config中文件
-    # dnn_node_example_path = os.path.join(
-    #     get_package_prefix('dnn_node_example'),
-    #     "lib/dnn_node_example")
-    # print("dnn_node_example_path is ", dnn_node_example_path)
-    # cp_cmd = "cp -r " + dnn_node_example_path + "/config ."
-    # print("cp_cmd is ", cp_cmd)
-    # os.system(cp_cmd)
+    mono_pwcnet_path = os.path.join(
+        get_package_prefix('mono_pwcnet'),
+        "lib/mono_pwcnet")
+    print("mono_pwcnet_path is ", mono_pwcnet_path)
+    cp_cmd = "cp -r " + mono_pwcnet_path + "/config ."
+    print("cp_cmd is ", cp_cmd)
+    os.system(cp_cmd)
 
     # args that can be set from the command line or a default will be used
     img_file_launch_arg = DeclareLaunchArgument(
-        "img_config_file", default_value=TextSubstitution(text="['config/img1.jpg','config/img2.jpg']")
+        "img_config_file", default_value=TextSubstitution(text="['config/img001.jpg','config/img002.jpg']")
     )
     dump_render_launch_arg = DeclareLaunchArgument(
         "pwcnet_dump_render_img", default_value=TextSubstitution(text="0")
@@ -66,7 +66,7 @@ def generate_launch_description():
         # usb cam图片发布pkg
         usb_cam_device_arg = DeclareLaunchArgument(
             'device',
-            default_value='/dev/video8',
+            default_value='/dev/video0',
             description='usb camera device')
 
         usb_node = IncludeLaunchDescription(
@@ -89,9 +89,7 @@ def generate_launch_description():
         # 本地图片发布
         feedback_picture_arg = DeclareLaunchArgument(
             'publish_image_source',
-            # default_value='/root/config/target.jpg',
-            # default_value='/root/config/bus.jpg',
-            default_value='/userdata/pwcnet/config2/',
+            default_value='config/',
             description='feedback picture')
 
         fb_node = IncludeLaunchDescription(
@@ -171,22 +169,6 @@ def generate_launch_description():
         }.items()
     )
     
-    
-    pwcnet_jpeg_codec_node = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(
-                get_package_share_directory('hobot_codec'),
-                'launch/hobot_codec_encode.launch.py')),
-        launch_arguments={
-            'codec_in_mode': 'ros',
-            'codec_out_mode': 'ros',
-            'codec_sub_topic': LaunchConfiguration("pwcnet_img_pub_topic_name"),
-            'codec_in_format': 'bgr8',
-            'codec_pub_topic': '/image',
-            'codec_out_format': 'jpeg'
-        }.items()
-    )
-
     # web展示pkg
     web_node = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -195,7 +177,6 @@ def generate_launch_description():
                 'launch/websocket.launch.py')),
         launch_arguments={
             'websocket_image_topic': '/image',
-            # 'websocket_image_topic': LaunchConfiguration("pwcnet_img_pub_topic_name"),
             'websocket_image_type': 'mjpeg',
             'websocket_only_show_image': 'false',
             'websocket_smart_topic': LaunchConfiguration("pwcnet_msg_pub_topic_name")
@@ -242,10 +223,9 @@ def generate_launch_description():
             # 图片发布pkg
             cam_node,
             # 图片编解码&发布pkg
-            # jpeg_codec_node,
+            jpeg_codec_node,
             # 启动example pkg
             pwcnet_node,
-            pwcnet_jpeg_codec_node,
             # 启动web展示pkg
             web_node
         ])
@@ -267,5 +247,5 @@ def generate_launch_description():
             # 启动example pkg
             pwcnet_node,
             # 启动web展示pkg
-            # web_node
+            web_node
         ])

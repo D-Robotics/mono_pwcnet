@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef MIBILESAM_OUTPUT_PARSER_H_
-#define MIBILESAM_OUTPUT_PARSER_H_
+#ifndef PWCNET_OUTPUT_PARSER_H_
+#define PWCNET_OUTPUT_PARSER_H_
 
 #include <cstring>
 #include <memory>
@@ -28,17 +28,14 @@
 #include "opencv2/imgproc.hpp"
 
 #include "dnn_node/dnn_node_data.h"
-#include "dnn_node/util/output_parser/perception_common.h"
 #include "rclcpp/rclcpp.hpp"
 
 using hobot::dnn_node::DNNTensor;
 using hobot::dnn_node::Model;
-using hobot::dnn_node::output_parser::DnnParserResult;
-using hobot::dnn_node::output_parser::OpticalFlow;
-using hobot::dnn_node::output_parser::Perception;
 
-// int RenderSeg(cv::Mat &mat, OpticalFlow &flow, std::string& saving_path);
-int GetCombine(cv::Mat &mat, OpticalFlow &flow, cv::Mat &output);
+struct OpticalFlow;
+enum class ImgType;
+
 class PwcNetOutputParser {
  public:
   PwcNetOutputParser(int output_height, int output_width, int num_classes, float mask_threshold) {
@@ -50,7 +47,7 @@ class PwcNetOutputParser {
   ~PwcNetOutputParser() {}
 
   int32_t Parse(
-      std::shared_ptr<DnnParserResult> &result,
+      std::shared_ptr<OpticalFlow> &result,
       const int resized_img_h,
       const int resized_img_w,
       const int model_h,
@@ -64,16 +61,7 @@ class PwcNetOutputParser {
     const int resized_img_w,
     const int model_h,
     const int model_w,
-    Perception& perception,
-    float ratio = 1.0);
-
-  int32_t GenMask(
-    const float* mask,
-    const int resized_img_h,
-    const int resized_img_w,
-    const int model_h,
-    const int model_w,
-    Perception& perception,
+    std::shared_ptr<OpticalFlow> &result,
     float ratio = 1.0);
 
  private:
