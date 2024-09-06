@@ -15,9 +15,11 @@
   <depend>rclcpp</depend>
   <depend>ai_msgs</depend>
   <depend>cv_bridge</depend>
+  <depend>hobot_cv</depend>
   <depend>dnn_node</depend>
   <depend>hbm_img_msgs</depend>
   <depend>sensor_msgs</depend>
+  <depend>std_msgs</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

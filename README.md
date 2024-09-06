@@ -136,21 +136,7 @@ cp -r install/lib/mono_pwcnet/config/ .
 export CAM_TYPE=usb
 
 # Mode 1: Start the launch file, run pwcnet node.
-ros2 launch mono_pwcnet pwcnet.launch_test.py pwcnet_dump_render_img:=0
-
-```
-
-## Run on X86 Ubuntu system:
-```shell
-export COLCON_CURRENT_PREFIX=./install
-source ./install/setup.bash
-# Copy the model used in the config as an example, adjust based on the actual installation path
-cp -r ./install/lib/mono_pwcnet/config/ .
-
-export CAM_TYPE=fb
-
-# Mode 1: Start the launch file, run pwcnet node.
-ros2 launch mono_pwcnet pwcnet.launch_test.py
+ros2 launch mono_pwcnet pwcnet.launch.py pwcnet_dump_render_img:=0
 
 ```
 

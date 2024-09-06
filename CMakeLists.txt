@@ -40,8 +40,8 @@ find_package(cv_bridge REQUIRED)
 find_package(hobot_cv REQUIRED)
 find_package(dnn_node REQUIRED)
 find_package(hbm_img_msgs REQUIRED)
-find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
 
 add_definitions(-DSHARED_MEM_ENABLED)
 
@@ -71,6 +71,12 @@ link_directories(
   ${CMAKE_SYSROOT}/usr/lib/hbbpu/
   ${CMAKE_SYSROOT}/usr/lib/hbmedia/
 )
+
+if(PLATFORM_X5)
+  link_directories(
+    ${CMAKE_SYSROOT}/usr/hobot/lib
+  )
+endif()
 
 add_executable(${PROJECT_NAME}
   src/main.cpp

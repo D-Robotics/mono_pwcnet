@@ -144,24 +144,10 @@ cp -r install/lib/mono_pwcnet/config/ .
 export CAM_TYPE=usb
 
 # 运行模式1：启动launch文件, 启动 pwcnet 节点
-ros2 launch mono_pwcnet pwcnet.launch_test.py pwcnet_dump_render_img:=0
+ros2 launch mono_pwcnet pwcnet.launch.py pwcnet_dump_render_img:=0
 
 ```
 
-## X86 Ubuntu系统上运行
-
-```shell
-export COLCON_CURRENT_PREFIX=./install
-source ./install/setup.bash
-# config中为示例使用的模型, 根据实际安装路径进行拷贝
-cp -r ./install/lib/mono_pwcnet/config/ .
-
-export CAM_TYPE=fb
-
-# 运行模式1：启动launch文件, 启动 pwcnet 节点
-ros2 launch mono_pwcnet pwcnet.launch_test.py
-
-```
 
 # 结果分析
 

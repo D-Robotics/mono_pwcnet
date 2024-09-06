@@ -34,7 +34,7 @@ class ImageUtils {
   static int Render(std::shared_ptr<PwcNetOutput> out, 
                     OpticalFlow &flow, 
                     cv::Mat &output);
-
+};
 #endif
 
 
