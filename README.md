@@ -22,8 +22,6 @@ In this example, we provide two deployment methods:
 
 - X5 Version: Supports compilation on the X5 Ubuntu system and cross-compilation using Docker on a PC.
 
-- X86 Version: Supports compilation on the X86 Ubuntu system.
-
 It also supports controlling the dependencies and functionality of the compiled pkg through compilation options.
 
 ## Dependency Libraries
@@ -35,6 +33,7 @@ ROS Packages:
 - ai_msgs
 - cv_bridge
 - dnn node
+- hobot_cv
 - hbm_img_msgs
 - sensor_msgs
 
@@ -79,25 +78,6 @@ hbm_img_msgs is a custom image message format used for image transmission in sha
 
 - Shared memory communication method is enabled by default in the compilation options.
 
-## Compile X86 Version on X86 Ubuntu System
-
-1. Compilation Environment Verification
-
-X86 Ubuntu version: ubuntu22.04
-
-2. Compilation
-
-- Compilation command:
-
-  ```shell
-  colcon build --packages-select mono_pwcnet \
-     --merge-install \
-     --cmake-force-configure \
-     --cmake-args \
-     --no-warn-unused-cli \
-     -DPLATFORM_X86=ON \
-     -DTHIRD_PARTY=`pwd`/../sysroot_docker
-  ```
 
 ## Notes
 
@@ -117,7 +97,7 @@ X86 Ubuntu version: ubuntu22.04
 | cache_img_limit          | Set the length of the image buffer for caching            | No                   | 11                   |                                                                         |
 | cache_task_limit          | Set the length of the task buffer for caching            | No                   | 8                   |                                                                         |
 | feed_type          | Image source, 0: local; 1: subscribe            | No                   | 0                   |                                                                         |
-| image_file_              | Local image path                          | No                   | {"config/img1.jpg", "config/img2.jpg"}     |                                                                         |
+| image_file_              | Local image path                          | No                   | {"config/img001.jpg", "config/img002.jpg"}     |                                                                         |
 | is_shared_mem_sub  | Subscribe to images using shared memory communication method        | No                   | 0                   |                                                                         |
 | dump_render_img    | Whether to render, 0: no; 1: yes            | No                   | 0                   |                                                                         |
 | ai_msg_pub_topic_name | Topic name for publishing intelligent results for web display | No                   | /hobot_pwcnet | |
@@ -156,21 +136,7 @@ cp -r install/lib/mono_pwcnet/config/ .
 export CAM_TYPE=usb
 
 # Mode 1: Start the launch file, run pwcnet node.
-ros2 launch mono_pwcnet pwcnet.launch_test.py pwcnet_dump_render_img:=0
-
-```
-
-## Run on X86 Ubuntu system:
-```shell
-export COLCON_CURRENT_PREFIX=./install
-source ./install/setup.bash
-# Copy the model used in the config as an example, adjust based on the actual installation path
-cp -r ./install/lib/mono_pwcnet/config/ .
-
-export CAM_TYPE=fb
-
-# Mode 1: Start the launch file, run pwcnet node.
-ros2 launch mono_pwcnet pwcnet.launch_test.py
+ros2 launch mono_pwcnet pwcnet.launch.py pwcnet_dump_render_img:=0
 
 ```
 
@@ -218,48 +184,7 @@ name: pwcnet_pwcnetneck_flyingchairs.
 [WARN] [0000000298.071860266] [hobot_yolo_world]: Get model name: pwcnet_pwcnetneck_flyingchairs from load model.
 [INFO] [0000000298.071901308] [pwcnet_node]: The model input width is 512 and height is 384
 [INFO] [0000000298.174975975] [mono_pwcnet]: [channel]: 2;  [height]: 96; [width]: 128; [quantiType]: 2; scale[0]: 0.00027313; scale[1]: 0.000285034
-[INFO] [0000000298.184596600] [MobileSam]: Draw result to file: render_pwcnet_feedback_0_0.jpeg
-^C[INFO] [0000000443.604610044] [rclcpp]: signal_handler(signum=2)
-^C^C[ros2run]: Interrupt
-root@buildroot:/userdata/pwcnet# cp config4/img001.jpg config/img001.jpg
-root@buildroot:/userdata/pwcnet# cp config4/img002.jpg config/img002.jpg
-root@buildroot:/userdata/pwcnet# ros2 run mono_pwcnet mono_pwcnet --ros-args -p image_file:=["config/img001.jpg","config/img002.jpg"] -p dump_render_img:=1
-[WARN] [0000000471.826425808] [mono_pwcnet]: Parameter:
- cache_img_limit: 11
- cache_task_limit: 8
- dump_render_img: 1
- feed_type(0:local, 1:sub): 0
- image_size: 2
- is_shared_mem_sub: 1
- is_sync_mode: 0
- ai_msg_pub_topic_name: /hobot_pwcnet
- ros_img_sub_topic_name: /image
- flow_img_pub_topic_name_: /pwcnet_img
-[INFO] [0000000471.826698349] [hobot_yolo_world]: Set node para.
-[WARN] [0000000471.826762058] [mono_pwcnet]: model_file_name_: config/model.hbm, task_num: 4
-[INFO] [0000000471.826820474] [dnn]: Node init.
-[INFO] [0000000471.826853516] [hobot_yolo_world]: Set node para.
-[WARN] [0000000471.826882641] [mono_pwcnet]: model_file_name_: config/model.hbm, task_num: 4
-[INFO] [0000000471.826932558] [dnn]: Model init.
-[BPU_PLAT]BPU Platform Version(1.3.6)!
-[HBRT] set log level as 0. version = 3.15.49.0
-[DNN] Runtime version = 1.23.8_(3.15.49 HBRT)
-[W][DNN]bpu_model_info.cpp:491][Version](1970-01-01,00:07:52.20.736) Model: pwcnet_pwcnetneck_flyingchairs. Inconsistency between the hbrt library version 3.15.49.0 and the model build version 3.15.54.0 detected, in order to ensure correct model results, it is recommended to use compilation tools and the BPU SDK from the same OpenExplorer package.
-[INFO] [0000000472.021419808] [dnn]: The model input 0 width is 512 and height is 384
-[INFO] [0000000472.021605391] [dnn]:
-Model Info:
-name: pwcnet_pwcnetneck_flyingchairs.
-[input]
- - (0) Layout: NCHW, Shape: [1, 6, 384, 512], Type: HB_DNN_TENSOR_TYPE_S8.
-[output]
- - (0) Layout: NCHW, Shape: [1, 2, 96, 128], Type: HB_DNN_TENSOR_TYPE_S32.
-
-[INFO] [0000000472.021669183] [dnn]: Task init.
-[INFO] [0000000472.023770558] [dnn]: Set task_num [4]
-[WARN] [0000000472.023827099] [hobot_yolo_world]: Get model name: pwcnet_pwcnetneck_flyingchairs from load model.
-[INFO] [0000000472.023866808] [pwcnet_node]: The model input width is 512 and height is 384
-[INFO] [0000000472.126077183] [mono_pwcnet]: [channel]: 2;  [height]: 96; [width]: 128; [quantiType]: 2; scale[0]: 0.00027313; scale[1]: 0.000285034
-[INFO] [0000000472.134030183] [MobileSam]: Draw result to file: render_pwcnet_feedback_0_0.jpeg
+[INFO] [0000000298.184596600] [PwcNet]: Draw result to file: render_pwcnet_feedback_0_0.jpeg
 ```
 
 ## Render img:

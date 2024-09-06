@@ -43,10 +43,10 @@ def generate_launch_description():
         "pwcnet_dump_render_img", default_value=TextSubstitution(text="0")
     )
     image_width_launch_arg = DeclareLaunchArgument(
-        "dnn_example_image_width", default_value=TextSubstitution(text="512")
+        "pwcnet_image_width", default_value=TextSubstitution(text="512")
     )
     image_height_launch_arg = DeclareLaunchArgument(
-        "dnn_example_image_height", default_value=TextSubstitution(text="384")
+        "pwcnet_image_height", default_value=TextSubstitution(text="384")
     )
     msg_pub_topic_name_launch_arg = DeclareLaunchArgument(
         "pwcnet_msg_pub_topic_name", default_value=TextSubstitution(text="/pwcnet_msg")
@@ -99,8 +99,8 @@ def generate_launch_description():
                     'launch/hobot_image_publisher.launch.py')),
             launch_arguments={
                 'publish_image_source': LaunchConfiguration('publish_image_source'),
-                'publish_output_image_w': LaunchConfiguration('dnn_example_image_width'),
-                'publish_output_image_h': LaunchConfiguration('dnn_example_image_height'),
+                'publish_output_image_w': LaunchConfiguration('pwcnet_image_width'),
+                'publish_output_image_h': LaunchConfiguration('pwcnet_image_height'),
                 'publish_image_format': 'jpg',
                 'publish_message_topic_name': '/hbmem_img',
                 'publish_fps': '5'
@@ -129,8 +129,8 @@ def generate_launch_description():
                     get_package_share_directory('mipi_cam'),
                     'launch/mipi_cam.launch.py')),
             launch_arguments={
-                'mipi_image_width': LaunchConfiguration('dnn_example_image_width'),
-                'mipi_image_height': LaunchConfiguration('dnn_example_image_height'),
+                'mipi_image_width': LaunchConfiguration('pwcnet_image_width'),
+                'mipi_image_height': LaunchConfiguration('pwcnet_image_height'),
                 'mipi_io_method': 'shared_mem',
                 'mipi_frame_ts_type': 'realtime',
                 'mipi_video_device': LaunchConfiguration('device')
