@@ -16,7 +16,6 @@
 #include <string>
 #include <vector>
 
-#include "ai_msgs/msg/grasp_group.hpp"
 #include "ai_msgs/msg/perception_targets.hpp"
 #include "cv_bridge/cv_bridge.h"
 #include "dnn_node/dnn_node.h"
