@@ -28,8 +28,6 @@
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/image.hpp"
 
-// #include "include/ai_msg_manage.h"
-// #include "include/data_preprocess.h"
 #include "include/pwcnet_output_parser.h"
 
 #ifndef PWCNET_NODE_H_

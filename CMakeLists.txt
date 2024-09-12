@@ -64,12 +64,12 @@ message("CMAKE_SYSROOT is " ${CMAKE_SYSROOT})
 include_directories(
   ${CMAKE_SYSROOT}/usr/include/
   ${CMAKE_SYSROOT}/usr/include/opencv/
-  ${CMAKE_SYSROOT}/usr/include/eigen/
+  ${CMAKE_SYSROOT}/usr/hobot/include/
 )
 
 link_directories(
   ${CMAKE_SYSROOT}/usr/lib/hbbpu/
-  ${CMAKE_SYSROOT}/usr/lib/hbmedia/
+  ${CMAKE_SYSROOT}/usr/hobot/lib/
 )
 
 if(PLATFORM_X5)
