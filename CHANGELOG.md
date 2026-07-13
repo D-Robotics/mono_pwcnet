@@ -1,5 +1,9 @@
 # Changelog for package mobie sam
 
+tros_0.2.0 (2026-07-13)
+------------------
+1. 适配 ROS2 Jazzy
+
 tros_0.1.0 (2024-09-12)
 ------------------
 1. 新增pwcnet根据两张图片计算光流的功能。
